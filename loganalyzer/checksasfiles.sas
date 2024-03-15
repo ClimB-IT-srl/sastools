@@ -302,7 +302,7 @@ ods listing;
 %mend checklogs;
 
 %let n=0;
-%macro readCatalog(path, localpath);
+%macro readCatalog(path, localpath, ext);
     * this macro reads a directory content, including files and subfolders;
     * it adds all children to zip archive, keeping track of subfolder intermediates;
     %local rc _path filrf did noe filename fid i;
@@ -312,8 +312,6 @@ ods listing;
     %else 
         %let _path = &path.\&localpath.;
         
-    %checklogs(loc=&_path., loc2=F:\Software\ConfigAPP\Lev3\SASAppETL\BatchServer\Logs, ext=.sas, fnm=, delm=@, out=checklogs&n.);
-
     %let n = %eval(&n. + 1);
     %let filrf = DIR&n.;
 
@@ -321,6 +319,8 @@ ods listing;
     %let did = %sysfunc(dopen(&filrf.));
     
     %if &did. le 0 %then %goto exit;
+
+    %checklogs(loc=&_path., loc2=F:\Software\ConfigAPP\Lev3\SASAppETL\BatchServer\Logs, ext=&ext., fnm=, delm=@, out=checklogs&n.);
     
     %let noe = %sysfunc(dnum(&did.));
 
@@ -332,9 +332,9 @@ ods listing;
         %end;
         %else %do;
             %if &localpath. = %then
-                %readCatalog(&path., &filename.);
+                %readCatalog(&path., &filename., &ext.);
              %else 
-                %readCatalog(&path., &localpath.\&filename.);
+                %readCatalog(&path., &localpath.\&filename., &ext.);
         %end;
     %end;
     %let rc=%sysfunc(dclose(&did.));
@@ -344,7 +344,10 @@ ods listing;
 %mend readCatalog;
 
 *%checklogs(loc=F:\Software\ConfigAPP\Lev3\SASAppETL\BatchServer\Logs, loc2=, ext=.log, fnm=, delm=@, out=);
-*%readCatalog(F:\Software\ConfigAPP\Lev3\SASAppETL\SASEnvironment\SASCode);
-%readCatalog(F:\Software\ConfigAPP\Lev3\SASAppETL\SASEnvironment\SASMacro);
+*%checklogs(loc=F:\Software\ConfigAPP\Lev3\SASAppETL\BatchServer\Scripts, loc2=, ext=.bat, fnm=, delm=@, out=);
+*%readCatalog(F:\Software\ConfigAPP\Lev3\SASAppETL\BatchServer\Logs,,.log);
+*%readCatalog(F:\Software\ConfigAPP\Lev3\SASAppETL\BatchServer\Scripts,,.bat);
+*%readCatalog(F:\Software\ConfigAPP\Lev3\SASAppETL\SASEnvironment\SASCode,,.sas);
+%readCatalog(F:\Software\ConfigAPP\Lev3\SASAppETL\SASEnvironment\SASMacro,,.sas);
 
 
