@@ -96,9 +96,29 @@ data _null_;
         rc = dosubl(text);
      end;
     
+     code = cats("filename inzip ZIP '", zip, "'", " member='", memname, "';");
+     code = cats(code, "filename outzip '~/monrepos/import/CAISSE/", memname, "';");
+     code = cats(code, "data _null_; rc = fcopy('inzip', 'outzip'); msg = sysmsg(); put rc= msg=;run;");
+     rc = dosubl(code);
+run;     
+
+
+
+/*
+data _null_;
+     set work.allfiles;
+     length text $200 code $2000;
+
+     if find(memname, '/') > 0 then do;
+        text = cats('%makedir(', substr(memname, 1, find(memname, strip(scan(memname, -1, "/"))) - 2),");");
+        put text=;
+        rc = dosubl(text);
+     end;
+    
      code = cats("filename inzip ZIP '", zip, "';");
      code = cats(code, "filename outzip '~/monrepos/import/CAISSE/", memname, "';");
-     code = cats(code, "data _null_; infile inzip('", memname, "')"); 
+     
+     code = cats(code, "data _null_; rc = fcopy('inzip', 'outzip');"); 
      code = catx('', code, "lrecl=256 recfm=F length=length eof=eof unbuf;");
      code = catx('', code, "file outzip lrecl=256 recfm=N;");
      code = catx('', code, "input;");
@@ -110,9 +130,6 @@ data _null_;
      rc = dosubl(code);
 run;     
 
-
-
-/*
 %makedir(CAISSE/ER-230EJ/STORE001/SALEBACK/CSVBACK/20230831/1510);
 
 filename inzip ZIP '~/monrepos/import/CAISSE.zip';
